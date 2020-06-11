@@ -77,6 +77,6 @@ Utilizeing dbscan clustering algorithm
 
 ## Trained Models
 
-![framework](figs/results.png)
+![framework](figs/framework.png)
 
 You can download the above models in the paper from [Google Drive]().
