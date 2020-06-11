@@ -46,69 +46,37 @@ ImageNet-pretrained models for **ResNet-50** will be automatically downloaded in
 We utilize 4 GPUs for training. **Note that**
 
 
-### Unsupervised Domain Adaptation
-To train the model(s) in the paper, run this command:
+### Stage I: Pretrain Model on Source Domain
+To train the model(s) in the source domain, run this command:
 ```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 python examples/spcl_train_uda.py -ds $SOURCE_DATASET -dt $TARGET_DATASET --logs-dir $PATH_LOGS
+sh script/pretrain.sh -ds $SOURCE_DATASET $TARGET_DATASET $SOURCE_DATASET resnet50 0
 ```
 
 *Example #1:* DukeMTMC-reID -> Market-1501
 ```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 python examples/spcl_train_uda.py -ds dukemtmc -dt market1501 --logs-dir logs/spcl_uda/duke2market_resnet50
-```
-*Example #2:* DukeMTMC-reID -> MSMT17
-```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 python examples/spcl_train_uda.py -ds dukemtmc -dt msmt17 --iters 800 --logs-dir logs/spcl_uda/duke2msmt_resnet50
-```
-*Example #3:* VehicleID -> VeRi
-```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 python examples/spcl_train_uda.py -ds vehicleid -dt veri --iters 800 --height 224 --width 224 --logs-dir logs/spcl_uda/vehicleid2veri_resnet50
+sh script/pretrain.sh dukemtmc market1501 resnet50 0
 ```
 
 
-## Evaluation
+### Stage II: End-to-end training with MLT
 
-We utilize 1 GTX-1080TI GPU for testing. **Note that**
-
-+ use `--width 128 --height 256` (default) for person datasets, and `--height 224 --width 224` for vehicle datasets;
-+ use `--dsbn` for domain adaptive models, and add `--test-source` if you want to test on the source domain;
-+ use `-a resnet50` (default) for the backbone of ResNet-50, and `-a resnet_ibn50a` for the backbone of IBN-ResNet.
-
-### Unsupervised Domain Adaptation
-
-To evaluate the model on the target-domain dataset, run:
+Utilizeing K-Means clustering algorithm
 
 ```shell
-CUDA_VISIBLE_DEVICES=0 python examples/test.py --dsbn -d $DATASET --resume $PATH_MODEL
+sh scripts/train_slabel_mticluster.sh market1501 dukemtmc resnet50 0 {log_path_name} 600,700,800 1
 ```
+600,700,800 denotes to the multi-class strategy
 
-To evaluate the model on the source-domain dataset, run:
+Utilizeing dbscan clustering algorithm
 
 ```shell
-CUDA_VISIBLE_DEVICES=0 python examples/test.py --dsbn --test-source -d $DATASET --resume $PATH_MODEL
+ sh scripts/train_slabel_dbscan.sh market1501 dukemtmc resnet50 {dropout} {log_path_name} 0
 ```
 
-*Example #1:* DukeMTMC-reID -> Market-1501
-```shell
-# test on the target domain
-CUDA_VISIBLE_DEVICES=0 python examples/test.py --dsbn -d market1501 --resume logs/spcl_uda/duke2market_resnet50/model_best.pth.tar
-# test on the source domain
-CUDA_VISIBLE_DEVICES=0 python examples/test.py --dsbn --test-source -d dukemtmc --resume logs/spcl_uda/duke2market_resnet50/model_best.pth.tar
-```
 
-### Unsupervised Learning
-To evaluate the model, run:
-```shell
-CUDA_VISIBLE_DEVICES=0 python examples/test.py -d $DATASET --resume $PATH
-```
-
-*Example #1:* DukeMTMC-reID
-```shell
-CUDA_VISIBLE_DEVICES=0 python examples/test.py -d dukemtmc --resume logs/spcl_usl/duke_resnet50/model_best.pth.tar
-```
 
 ## Trained Models
 
 ![framework](figs/results.png)
 
-You can download the above models in the paper from [Google Drive](https://drive.google.com/open?id=19vYA4EfInuH4ZKg0HeBRmDmgK1KLdivz).
+You can download the above models in the paper from [Google Drive]().
